@@ -5,10 +5,12 @@
 
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { GoogleGenAI, Type, ThinkingLevel } from '@google/genai';
 import { validateMaterialAnalysis, generateSpecimenId } from './src/utils/material-schema.ts';
+import { SAMPLE_MATERIALS } from './src/data/sample-materials.ts';
 
 dotenv.config();
 
@@ -18,7 +20,73 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = Number(process.env.PORT) || 3000;
 
-app.use(express.json({ limit: '35mb' }));
+app.use(express.json({ limit: '40mb' }));
+
+// Set up persistent data and scans directories
+const dataDir = path.resolve(__dirname, 'data');
+const scansDir = path.resolve(__dirname, 'public', 'scans');
+const archiveFile = path.resolve(dataDir, 'archive.json');
+
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+if (!fs.existsSync(scansDir)) {
+  fs.mkdirSync(scansDir, { recursive: true });
+}
+
+// Helper to read persistent archive
+function readArchive(): any[] {
+  try {
+    if (fs.existsSync(archiveFile)) {
+      const content = fs.readFileSync(archiveFile, 'utf-8');
+      const parsed = JSON.parse(content);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.warn('Read archive error:', err);
+  }
+  // Initialize with curated reference specimens
+  const initial = SAMPLE_MATERIALS.map((sample) => sample.analysis);
+  writeArchive(initial);
+  return initial;
+}
+
+// Helper to write persistent archive
+function writeArchive(items: any[]): void {
+  try {
+    fs.writeFileSync(archiveFile, JSON.stringify(items, null, 2), 'utf-8');
+  } catch (err) {
+    console.warn('Write archive error:', err);
+  }
+}
+
+// Helper to convert base64 image data to local disk file in /public/scans
+function persistImageToDisk(base64DataOrUrl: string, specimenId: string): string {
+  if (!base64DataOrUrl || !base64DataOrUrl.startsWith('data:image/')) {
+    return base64DataOrUrl;
+  }
+
+  try {
+    const mimeMatch = base64DataOrUrl.match(/^data:image\/([a-zA-Z0-9+.-]+);base64,/);
+    const subType = mimeMatch ? mimeMatch[1].toLowerCase() : 'jpg';
+    const ext = subType.includes('png') ? 'png' : 'jpg';
+    const cleanBase64 = base64DataOrUrl.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '');
+
+    const fileName = `${specimenId}.${ext}`;
+    const filePath = path.resolve(scansDir, fileName);
+    fs.writeFileSync(filePath, Buffer.from(cleanBase64, 'base64'));
+
+    return `/scans/${fileName}`;
+  } catch (err) {
+    console.warn('Persist image error:', err);
+    return base64DataOrUrl;
+  }
+}
+
+// Initialize archive if empty
+readArchive();
 
 // Initialize GoogleGenAI SDK with server-side API key
 const ai = new GoogleGenAI({
@@ -38,6 +106,73 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// GET /api/archive - Retrieve all persisted scans & specimens
+app.get('/api/archive', (req, res) => {
+  try {
+    const archive = readArchive();
+    res.json({ success: true, archive });
+  } catch (err: any) {
+    res.status(500).json({ error: err?.message || 'Failed to read archive' });
+  }
+});
+
+// POST /api/archive - Save or sync a specimen to persistent archive
+app.post('/api/archive', (req, res) => {
+  try {
+    const { specimen } = req.body;
+    if (!specimen || !specimen.specimenId) {
+      return res.status(400).json({ error: 'Missing specimen data' });
+    }
+
+    // Persist image to disk if base64 to avoid localStorage/memory limits
+    if (specimen.imageUrl && specimen.imageUrl.startsWith('data:image/')) {
+      specimen.imageUrl = persistImageToDisk(specimen.imageUrl, specimen.specimenId);
+    }
+
+    const current = readArchive();
+    const updated = [specimen, ...current.filter((item) => item.specimenId !== specimen.specimenId)];
+    writeArchive(updated);
+
+    res.json({ success: true, specimen });
+  } catch (err: any) {
+    res.status(500).json({ error: err?.message || 'Failed to save specimen' });
+  }
+});
+
+// DELETE /api/archive/:id - Delete a single specimen
+app.delete('/api/archive/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const current = readArchive();
+    const updated = current.filter((item) => item.specimenId !== id);
+    writeArchive(updated);
+
+    // Clean up file if present
+    ['jpg', 'png'].forEach((ext) => {
+      const p = path.resolve(scansDir, `${id}.${ext}`);
+      if (fs.existsSync(p)) {
+        try { fs.unlinkSync(p); } catch (_) {}
+      }
+    });
+
+    res.json({ success: true, id });
+  } catch (err: any) {
+    res.status(500).json({ error: err?.message || 'Failed to delete specimen' });
+  }
+});
+
+// POST /api/archive/clear - Reset archive to standard reference set
+app.post('/api/archive/clear', (req, res) => {
+  try {
+    const initial = SAMPLE_MATERIALS.map((sample) => sample.analysis);
+    writeArchive(initial);
+    res.json({ success: true, archive: initial });
+  } catch (err: any) {
+    res.status(500).json({ error: err?.message || 'Failed to clear archive' });
+  }
+});
+
+// POST /api/analyze - Execute multimodal material analysis
 app.post('/api/analyze', async (req, res) => {
   try {
     const { imageBase64, mimeType = 'image/jpeg' } = req.body;
@@ -252,6 +387,27 @@ RULES & ACCURACY REQUIREMENTS:
     const parsedData = JSON.parse(sanitizedJson);
     const specimenId = generateSpecimenId();
     const validatedAnalysis = validateMaterialAnalysis(parsedData, specimenId);
+
+    // Save image permanently to /public/scans disk file
+    try {
+      const ext = mimeType.includes('png') ? 'png' : 'jpg';
+      const fileName = `${specimenId}.${ext}`;
+      const filePath = path.resolve(scansDir, fileName);
+      fs.writeFileSync(filePath, Buffer.from(cleanBase64, 'base64'));
+      validatedAnalysis.imageUrl = `/scans/${fileName}`;
+    } catch (saveImgErr) {
+      console.warn('Failed to save scan image to disk:', saveImgErr);
+      validatedAnalysis.imageUrl = imageBase64;
+    }
+
+    // Automatically persist to server archive so it never disappears on refresh
+    try {
+      const current = readArchive();
+      const updated = [validatedAnalysis, ...current.filter((item) => item.specimenId !== specimenId)];
+      writeArchive(updated);
+    } catch (e) {
+      console.warn('Failed to update server archive:', e);
+    }
 
     res.json({
       success: true,

@@ -239,4 +239,60 @@ export const SAMPLE_MATERIALS: SampleMaterial[] = [
       },
     },
   },
+  {
+    id: 'birch-plywood-bench',
+    name: 'Birch Plywood (Laminated Slotted Bench)',
+    category: 'Engineered Wood / CNC Furniture',
+    thumbnail: '/assets/aistudio/IMG_5508_d36981d0.png',
+    analysis: {
+      specimenId: 'MAT-2026-7205',
+      timestamp: '2026-10-22T12:35:00.000Z',
+      imageUrl: '/assets/aistudio/IMG_5508_d36981d0.png',
+      identification: {
+        materialName: 'Birch Plywood (Laminated)',
+        secondaryMaterials: ['Water-based adhesive / PVA glue lines', 'Clear matte wood lacquer or polyurethane finish'],
+        classification: 'Engineered Wood / Laminated Veneer Lumber',
+        confidence: 'HIGH',
+        visibleCharacteristics: 'Exposed edge grain clearly displaying thin alternating veneer laminations. Continuous curved radius indicates form-pressed steam-bent plywood ribs with CNC finger-jointed spacing.',
+      },
+      properties: {
+        durability: 'High static strength and resilience; multi-ply cross-lamination prevents splitting under localized load.',
+        structuralBehavior: 'High compressive and bending strength along the curved continuous rib arches.',
+        rigidityOrFlexibility: 'High stiffness with minimal flex, engineered to distribute seated weight across repeating vertical ribs.',
+        surfaceTextureAndFinish: 'Smooth sanded pale birch face veneer with natural fine wood grain and low-sheen satin protective coat.',
+        environmentalResistance: 'Designed for interior climate-controlled environments; avoid prolonged moisture exposure on exposed ply edges.',
+        manufacturingProcesses: ['Rotary peeling', 'Multi-ply hydraulic lamination', 'CNC router cutting', 'Press-brake form bending'],
+        typicalApplications: ['Architectural benches', 'Auditorium seating', 'Curved statement furniture', 'Modular acoustic baffles'],
+      },
+      sustainability: {
+        recyclability: 'Industrial particleboard downcycling or clean biomass conversion at specialized reclamation facilities.',
+        reusability: 'Very high; structural modular ribs can be dissembled and repurposed as shelving brackets or architectural louvers.',
+        repairability: 'Excellent; surface scratches can be spot-sanded with 240-grit paper and resealed with water-based polyurethane.',
+        longevity: '35–60+ years with standard interior care.',
+        environmentalConcerns: 'Sustainably managed birch forestry sequesters carbon; check for low-VOC / formaldehyde-free adhesive lines.',
+        endOfLifeAndSeparation: 'Mechanical fasteners or unglued interlocking slots allow rapid clean end-of-life disassembly.',
+      },
+      redesign: {
+        repair: {
+          title: 'Fine-Grit Scuff & Matte Polyurethane Reseal',
+          description: 'Sand abrasion marks with 240-grit sandpaper along the grain direction, clean with a tack cloth, and apply two coats of waterborne matte polyurethane.',
+          toolsOrMethods: ['240-grit sandpaper', 'Tack cloth', 'Foam brush', 'Waterborne matte finish'],
+        },
+        reuse: {
+          title: 'Architectural Louver Screen / Planter Plinth',
+          description: 'Repurpose the slotted arch structure into a ventilated acoustic partition or an elevated indoor plant display shelf.',
+          suitability: 'Curved vertical rib architecture allows filtered air and light penetration while retaining structural rigidity.',
+        },
+        reimagine: {
+          title: 'Interlocking Modular Flat-Pack Seating System',
+          description: 'Translate this design into a zero-hardware friction-fit circular product line cut entirely from offcut sheet plywood without synthetic glues.',
+          circularConcept: 'Eliminates toxic glues and non-recyclable hardware for 100% pure monomaterial timber recycling.',
+        },
+      },
+      designInsight: {
+        industrialDesignContext: 'Utilizing repeating CNC-machined cross-laminated ribs allows designers to achieve organic compound curves with exceptional weight capacity while celebrating the structural honesty of exposed multi-ply edges.',
+        verificationGuidance: 'Examine the edge profile under raking light to count the distinct micro-veneer layers (typically 1.4mm each). A fingernail tap produces a distinct high-pitched resonant acoustic timbre characteristic of dense multi-ply hardwoods.',
+      },
+    },
+  },
 ];

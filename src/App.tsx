@@ -15,6 +15,12 @@ import { AboutModal } from './components/AboutModal.tsx';
 import { SAMPLE_MATERIALS, SampleMaterial } from './data/sample-materials.ts';
 import { MaterialAnalysis } from './utils/material-schema.ts';
 import { optimizeImageForAnalysis } from './utils/image-compress.ts';
+import {
+  loadSpecimensFromIDB,
+  saveSpecimenToIDB,
+  deleteSpecimenFromIDB,
+  clearAllSpecimensFromIDB,
+} from './utils/archive-storage.ts';
 import { Camera, Upload, ArrowRight, Sparkles, Layers, RefreshCw, AlertTriangle } from 'lucide-react';
 
 type ScreenState = 'home' | 'camera' | 'preview' | 'analyzing' | 'results';
@@ -27,20 +33,8 @@ export default function App() {
   const [activeAnalysis, setActiveAnalysis] = useState<MaterialAnalysis | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
-  // Archive state persisted in localStorage
+  // Archive state persisted in IndexedDB and server-side disk storage
   const [savedArchive, setSavedArchive] = useState<MaterialAnalysis[]>(() => {
-    try {
-      const stored = localStorage.getItem(ARCHIVE_STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      }
-    } catch (e) {
-      console.warn('Failed to load archive from localStorage:', e);
-    }
-    // Seed initial archive with all 4 curated reference specimens
     return SAMPLE_MATERIALS.map((sample) => sample.analysis);
   });
 
@@ -50,14 +44,58 @@ export default function App() {
   // Hidden file input for direct file upload from home screen
   const fileInputHomeRef = useRef<HTMLInputElement | null>(null);
 
-  // Save archive to localStorage whenever it changes
+  // Load from IndexedDB and sync with server archive on mount
   useEffect(() => {
-    try {
-      localStorage.setItem(ARCHIVE_STORAGE_KEY, JSON.stringify(savedArchive));
-    } catch (e) {
-      console.warn('Failed to save archive to localStorage:', e);
+    let isMounted = true;
+
+    async function loadArchive() {
+      // 1. Immediately read from IndexedDB for instant UI rendering
+      const idbSpecimens = await loadSpecimensFromIDB();
+      if (isMounted && idbSpecimens.length > 0) {
+        setSavedArchive((prev) => {
+          const map = new Map<string, MaterialAnalysis>();
+          prev.forEach((item) => map.set(item.specimenId, item));
+          idbSpecimens.forEach((item) => map.set(item.specimenId, item));
+          return Array.from(map.values()).sort(
+            (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          );
+        });
+      }
+
+      // 2. Fetch server archive for any permanent scans saved to disk
+      try {
+        const response = await fetch('/api/archive');
+        const data = await response.json();
+        if (isMounted && data.success && Array.isArray(data.archive)) {
+          setSavedArchive((prev) => {
+            const map = new Map<string, MaterialAnalysis>();
+            SAMPLE_MATERIALS.forEach((s) => map.set(s.analysis.specimenId, s.analysis));
+            prev.forEach((item) => map.set(item.specimenId, item));
+            data.archive.forEach((item: MaterialAnalysis) => map.set(item.specimenId, item));
+
+            const merged = Array.from(map.values()).sort(
+              (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            );
+
+            // Backfill merged items to IndexedDB
+            for (const item of merged) {
+              saveSpecimenToIDB(item);
+            }
+
+            return merged;
+          });
+        }
+      } catch (err) {
+        console.warn('Server archive sync notice:', err);
+      }
     }
-  }, [savedArchive]);
+
+    loadArchive();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Reset scroll to top on screen transitions
   useEffect(() => {
@@ -148,17 +186,27 @@ export default function App() {
 
       const completedAnalysis: MaterialAnalysis = {
         ...data.analysis,
-        imageUrl: selectedImageSrc,
+        imageUrl: data.analysis.imageUrl || selectedImageSrc,
       };
 
       setActiveAnalysis(completedAnalysis);
       setCurrentScreen('results');
 
-      // Auto-save scan into local archive
+      // Auto-save scan into persistent archive
       setSavedArchive((prev) => {
         const filtered = prev.filter((item) => item.specimenId !== completedAnalysis.specimenId);
         return [completedAnalysis, ...filtered];
       });
+
+      // Persist to IndexedDB
+      saveSpecimenToIDB(completedAnalysis);
+
+      // Persist to Server Storage
+      fetch('/api/archive', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ specimen: completedAnalysis }),
+      }).catch((e) => console.warn('Server archive sync notice:', e));
     } catch (err: any) {
       console.warn('Analysis execution note:', err?.message || err);
       const msg = err?.message || 'Unable to complete material analysis. Tap "Retry Analysis" or photograph another angle.';
@@ -173,13 +221,49 @@ export default function App() {
     setCurrentScreen('results');
   };
 
-  const handleToggleArchiveSave = () => {
+  const handleToggleArchiveSave = async () => {
     if (!activeAnalysis) return;
     const exists = savedArchive.some((item) => item.specimenId === activeAnalysis.specimenId);
     if (exists) {
       setSavedArchive((prev) => prev.filter((item) => item.specimenId !== activeAnalysis.specimenId));
+      await deleteSpecimenFromIDB(activeAnalysis.specimenId);
+      fetch(`/api/archive/${activeAnalysis.specimenId}`, { method: 'DELETE' }).catch(() => {});
     } else {
       setSavedArchive((prev) => [activeAnalysis, ...prev]);
+      await saveSpecimenToIDB(activeAnalysis);
+      fetch('/api/archive', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ specimen: activeAnalysis }),
+      }).catch(() => {});
+    }
+  };
+
+  const handleDeleteSpecimen = async (specimenId: string) => {
+    setSavedArchive((prev) => prev.filter((item) => item.specimenId !== specimenId));
+    await deleteSpecimenFromIDB(specimenId);
+    fetch(`/api/archive/${specimenId}`, { method: 'DELETE' }).catch(() => {});
+  };
+
+  const handleClearArchive = async () => {
+    if (window.confirm('Reset specimen archive to standard reference set?')) {
+      await clearAllSpecimensFromIDB();
+      try {
+        const res = await fetch('/api/archive/clear', { method: 'POST' });
+        const data = await res.json();
+        if (data.success && Array.isArray(data.archive)) {
+          setSavedArchive(data.archive);
+          for (const item of data.archive) {
+            saveSpecimenToIDB(item);
+          }
+          return;
+        }
+      } catch (_) {}
+      const fallback = SAMPLE_MATERIALS.map((s) => s.analysis);
+      setSavedArchive(fallback);
+      for (const item of fallback) {
+        saveSpecimenToIDB(item);
+      }
     }
   };
 
@@ -316,14 +400,8 @@ export default function App() {
                 setSelectedImageSrc(specimen.imageUrl || null);
                 setCurrentScreen('results');
               }}
-              onDeleteSpecimen={(id) => {
-                setSavedArchive((prev) => prev.filter((item) => item.specimenId !== id));
-              }}
-              onClearArchive={() => {
-                if (window.confirm('Clear all saved material specimens from archive?')) {
-                  setSavedArchive([]);
-                }
-              }}
+              onDeleteSpecimen={handleDeleteSpecimen}
+              onClearArchive={handleClearArchive}
               onStartScan={handleStartScan}
             />
           </div>
@@ -398,14 +476,8 @@ export default function App() {
           setCurrentScreen('results');
           setIsArchiveOpen(false);
         }}
-        onRemoveSpecimen={(id) => {
-          setSavedArchive((prev) => prev.filter((item) => item.specimenId !== id));
-        }}
-        onClearArchive={() => {
-          if (window.confirm('Clear all saved material specimens from archive?')) {
-            setSavedArchive([]);
-          }
-        }}
+        onRemoveSpecimen={handleDeleteSpecimen}
+        onClearArchive={handleClearArchive}
       />
 
       <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
