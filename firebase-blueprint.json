@@ -1,0 +1,54 @@
+{
+  "entities": {
+    "Specimen": {
+      "title": "Material Specimen Record",
+      "description": "Represents an analyzed physical material specimen, its classification, physical properties, circular economy pathways, and photograph reference.",
+      "type": "object",
+      "properties": {
+        "specimenId": {
+          "type": "string",
+          "description": "Unique identifier formatted as MAT-YYYY-XXXX",
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "maxLength": 64
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "ISO timestamp of when the specimen was analyzed or documented",
+          "maxLength": 64
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "Reference URL or data URI for the examined specimen photograph",
+          "maxLength": 500000
+        },
+        "identification": {
+          "type": "object",
+          "description": "Primary material identification and classification data"
+        },
+        "properties": {
+          "type": "object",
+          "description": "Physical, mechanical, and surface properties"
+        },
+        "sustainability": {
+          "type": "object",
+          "description": "Life cycle, circularity, recyclability, and longevity ratings"
+        },
+        "redesign": {
+          "type": "object",
+          "description": "Repair restoration, practical reuse, and reimagine concepts"
+        },
+        "designInsight": {
+          "type": "object",
+          "description": "Industrial design historical context and non-destructive verification guidance"
+        }
+      },
+      "required": ["specimenId", "timestamp", "identification", "properties", "sustainability", "redesign", "designInsight"]
+    }
+  },
+  "firestore": {
+    "/specimens/{specimenId}": {
+      "schema": "Specimen",
+      "description": "Shared real-time collection of all documented material specimens visible to all users across devices."
+    }
+  }
+}

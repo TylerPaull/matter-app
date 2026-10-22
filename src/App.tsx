@@ -21,6 +21,12 @@ import {
   deleteSpecimenFromIDB,
   clearAllSpecimensFromIDB,
 } from './utils/archive-storage.ts';
+import {
+  subscribeToSharedSpecimens,
+  saveSpecimenToCloud,
+  deleteSpecimenFromCloud,
+  testFirestoreConnection,
+} from './utils/firebase.ts';
 import { Camera, Upload, ArrowRight, Sparkles, Layers, RefreshCw, AlertTriangle } from 'lucide-react';
 
 type ScreenState = 'home' | 'camera' | 'preview' | 'analyzing' | 'results';
@@ -44,13 +50,15 @@ export default function App() {
   // Hidden file input for direct file upload from home screen
   const fileInputHomeRef = useRef<HTMLInputElement | null>(null);
 
-  // Load from IndexedDB and sync with server archive on mount
+  // Real-time synchronization across all devices and users via Firebase Firestore
   useEffect(() => {
     let isMounted = true;
 
-    async function loadArchive() {
-      // 1. Immediately read from IndexedDB for instant UI rendering
-      const idbSpecimens = await loadSpecimensFromIDB();
+    // Test connection on boot per Firestore integration guidelines
+    testFirestoreConnection();
+
+    // 1. Immediately read from IndexedDB for instant offline-first UI rendering
+    loadSpecimensFromIDB().then((idbSpecimens) => {
       if (isMounted && idbSpecimens.length > 0) {
         setSavedArchive((prev) => {
           const map = new Map<string, MaterialAnalysis>();
@@ -61,39 +69,45 @@ export default function App() {
           );
         });
       }
+    });
 
-      // 2. Fetch server archive for any permanent scans saved to disk
-      try {
-        const response = await fetch('/api/archive');
-        const data = await response.json();
-        if (isMounted && data.success && Array.isArray(data.archive)) {
-          setSavedArchive((prev) => {
-            const map = new Map<string, MaterialAnalysis>();
-            SAMPLE_MATERIALS.forEach((s) => map.set(s.analysis.specimenId, s.analysis));
-            prev.forEach((item) => map.set(item.specimenId, item));
-            data.archive.forEach((item: MaterialAnalysis) => map.set(item.specimenId, item));
+    // 2. Real-time Firestore Subscription (Live sync across phone, computer, and all viewers)
+    const unsubscribe = subscribeToSharedSpecimens(
+      (cloudSpecimens) => {
+        if (!isMounted) return;
 
-            const merged = Array.from(map.values()).sort(
-              (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-            );
-
-            // Backfill merged items to IndexedDB
-            for (const item of merged) {
-              saveSpecimenToIDB(item);
-            }
-
-            return merged;
+        if (cloudSpecimens.length === 0) {
+          // Initial bootstrap: seed Firestore with all reference specimens + user's bench
+          SAMPLE_MATERIALS.forEach((sample) => {
+            saveSpecimenToCloud(sample.analysis).catch(() => {});
           });
+          return;
         }
-      } catch (err) {
-        console.warn('Server archive sync notice:', err);
-      }
-    }
 
-    loadArchive();
+        // Merge cloud specimens with reference materials
+        const map = new Map<string, MaterialAnalysis>();
+        SAMPLE_MATERIALS.forEach((s) => map.set(s.analysis.specimenId, s.analysis));
+        cloudSpecimens.forEach((item) => map.set(item.specimenId, item));
+
+        const merged = Array.from(map.values()).sort(
+          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+
+        setSavedArchive(merged);
+
+        // Update local IndexedDB cache
+        for (const item of merged) {
+          saveSpecimenToIDB(item);
+        }
+      },
+      (err) => {
+        console.warn('Real-time cloud sync notice:', err);
+      }
+    );
 
     return () => {
       isMounted = false;
+      unsubscribe();
     };
   }, []);
 
@@ -201,6 +215,9 @@ export default function App() {
       // Persist to IndexedDB
       saveSpecimenToIDB(completedAnalysis);
 
+      // Persist to Cloud Firestore (Real-time live sync to computer & all devices)
+      saveSpecimenToCloud(completedAnalysis).catch((e) => console.warn('Cloud save error:', e));
+
       // Persist to Server Storage
       fetch('/api/archive', {
         method: 'POST',
@@ -227,10 +244,12 @@ export default function App() {
     if (exists) {
       setSavedArchive((prev) => prev.filter((item) => item.specimenId !== activeAnalysis.specimenId));
       await deleteSpecimenFromIDB(activeAnalysis.specimenId);
+      await deleteSpecimenFromCloud(activeAnalysis.specimenId).catch(() => {});
       fetch(`/api/archive/${activeAnalysis.specimenId}`, { method: 'DELETE' }).catch(() => {});
     } else {
       setSavedArchive((prev) => [activeAnalysis, ...prev]);
       await saveSpecimenToIDB(activeAnalysis);
+      await saveSpecimenToCloud(activeAnalysis).catch(() => {});
       fetch('/api/archive', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -242,6 +261,7 @@ export default function App() {
   const handleDeleteSpecimen = async (specimenId: string) => {
     setSavedArchive((prev) => prev.filter((item) => item.specimenId !== specimenId));
     await deleteSpecimenFromIDB(specimenId);
+    await deleteSpecimenFromCloud(specimenId).catch(() => {});
     fetch(`/api/archive/${specimenId}`, { method: 'DELETE' }).catch(() => {});
   };
 

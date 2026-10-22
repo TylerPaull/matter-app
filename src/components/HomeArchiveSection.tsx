@@ -90,11 +90,15 @@ export const HomeArchiveSection: React.FC<HomeArchiveSectionProps> = ({
       {/* Section Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
             <Archive className="w-4 h-4 text-[#26352D]" />
             <span className="font-spec text-xs tracking-widest text-[#26352D] uppercase font-bold">
               SPECIMEN ARCHIVE & PREVIOUS SCANS
             </span>
+            <div className="flex items-center gap-1 bg-[#26352D]/10 text-[#26352D] px-2 py-0.5 text-[9px] font-spec font-bold uppercase tracking-wider ml-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+              <span>LIVE CLOUD SYNCED (PHONE + COMPUTER)</span>
+            </div>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-[#222522] uppercase tracking-tight">
             ALL DOCUMENTED MATERIAL SPECIMENS

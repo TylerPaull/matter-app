@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function isValidSpecimen(data, id) {
+      return data.keys().hasAll(['specimenId', 'timestamp', 'identification', 'properties', 'sustainability', 'redesign', 'designInsight'])
+        && data.specimenId is string
+        && data.specimenId.size() <= 64
+        && data.specimenId == id
+        && data.timestamp is string
+        && data.timestamp.size() <= 64
+        && data.identification is map
+        && data.properties is map
+        && data.sustainability is map
+        && data.redesign is map
+        && data.designInsight is map;
+    }
+
+    // Shared specimens collection - accessible across all devices & users
+    match /specimens/{specimenId} {
+      // Anyone can inspect the community & shared material archive
+      allow read: if true;
+
+      // Anyone can document and save new material specimens to the shared library
+      allow create: if isValidId(specimenId) && isValidSpecimen(incoming(), specimenId);
+
+      // Anyone can update or enrich documented specimens
+      allow update: if isValidId(specimenId) && isValidSpecimen(incoming(), specimenId);
+
+      // Allow removing a specimen by valid ID
+      allow delete: if isValidId(specimenId);
+    }
+  }
+}
