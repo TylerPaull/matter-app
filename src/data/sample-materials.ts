@@ -1,0 +1,242 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { MaterialAnalysis } from '../utils/material-schema.ts';
+
+export interface SampleMaterial {
+  id: string;
+  name: string;
+  category: string;
+  thumbnail: string;
+  analysis: MaterialAnalysis;
+}
+
+export const SAMPLE_MATERIALS: SampleMaterial[] = [
+  {
+    id: 'ash-plywood',
+    name: 'Molded European Ash Plywood',
+    category: 'Engineered Timber / Composite Wood',
+    // Clean SVG data URI of molded wood grain texture
+    thumbnail: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="600" height="400" fill="%23C2A385"/><path d="M0,50 Q150,40 300,55 T600,45" stroke="%23A88460" stroke-width="3" fill="none" opacity="0.6"/><path d="M0,120 Q200,105 400,125 T600,115" stroke="%238E6B47" stroke-width="4" fill="none" opacity="0.7"/><path d="M0,200 Q120,215 300,195 T600,205" stroke="%23A88460" stroke-width="3" fill="none" opacity="0.6"/><path d="M0,280 Q250,265 450,290 T600,275" stroke="%238E6B47" stroke-width="5" fill="none" opacity="0.8"/><path d="M0,350 Q180,335 360,355 T600,345" stroke="%23A88460" stroke-width="3" fill="none" opacity="0.6"/><rect x="20" y="20" width="560" height="360" fill="none" stroke="%2326352D" stroke-width="2" opacity="0.3"/></svg>`,
+    analysis: {
+      specimenId: 'MAT-2026-8801',
+      timestamp: '2026-10-22T10:15:00.000Z',
+      imageUrl: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="600" height="400" fill="%23C2A385"/><path d="M0,50 Q150,40 300,55 T600,45" stroke="%23A88460" stroke-width="3" fill="none" opacity="0.6"/><path d="M0,120 Q200,105 400,125 T600,115" stroke="%238E6B47" stroke-width="4" fill="none" opacity="0.7"/><path d="M0,200 Q120,215 300,195 T600,205" stroke="%23A88460" stroke-width="3" fill="none" opacity="0.6"/><path d="M0,280 Q250,265 450,290 T600,275" stroke="%238E6B47" stroke-width="5" fill="none" opacity="0.8"/><path d="M0,350 Q180,335 360,355 T600,345" stroke="%23A88460" stroke-width="3" fill="none" opacity="0.6"/><text x="40" y="360" font-family="monospace" font-size="14" fill="%2326352D" font-weight="bold">SPECIMEN / MAT-2026-8801 · MOLDED ASH PLYWOOD</text></svg>`,
+      identification: {
+        materialName: 'Molded European Ash Plywood (Fraxinus excelsior)',
+        secondaryMaterials: ['Urea-formaldehyde / bio-resin adhesive layer', 'Matte polyurethane protective sealer'],
+        classification: 'Engineered Wood / Laminated Veneer Lumber',
+        confidence: 'HIGH',
+        visibleCharacteristics: 'Pronounced straight grain pattern, alternating 1.2mm rotary-cut veneer laminations visible along curved edge, smooth low-sheen satin finish.',
+      },
+      properties: {
+        durability: 'High resistance to static fatigue and repeated flexing; susceptible to deep abrasion if protective lacquer is compromised.',
+        structuralBehavior: 'Exceptional strength-to-weight ratio; cross-laminated grain orientation prevents dimensional warping and splitting.',
+        rigidityOrFlexibility: 'Engineered elastic flexure along compound curved radius while retaining torsional stiffness.',
+        surfaceTextureAndFinish: 'Tactile open-pore fine grain with smooth warm hand-feel and non-reflective matte clear coat.',
+        environmentalResistance: 'Moderate; indoor rated. Sensitive to relative humidity fluctuations above 65% and prolonged direct UV exposure.',
+        manufacturingProcesses: ['Rotary veneer peeling', 'High-frequency heat pressing', 'CNC 5-axis edge trimming', 'Spray finishing'],
+        typicalApplications: ['Ergonomic bentwood seating', 'Architectural acoustic baffles', 'Skateboards', 'Curved cabinetry'],
+      },
+      sustainability: {
+        recyclability: 'Low for standard municipal streams due to thermoset glue lines; downcyclable to particleboard feedstock or biomass energy.',
+        reusability: 'Very high; structural bentwood shells can be remounted onto new bases or cut into curved architectural cladding.',
+        repairability: 'Excellent; surface dents can be raised with steam; scratches can be sanded and re-oiled with hardwax oil.',
+        longevity: '40–75+ years with climate-controlled indoor maintenance.',
+        environmentalConcerns: 'Embodied carbon sequestered during tree growth; potential VOC emissions from legacy petrochemical resin adhesives.',
+        endOfLifeAndSeparation: 'Requires mechanical shredding or bio-enzymatic delamination to isolate wood fibers from thermoset resin.',
+      },
+      redesign: {
+        repair: {
+          title: 'Steam-Swelling & Hardwax Re-oiling',
+          description: 'Swell surface indentations using a damp cotton cloth and temperature-regulated iron, followed by 320-grit light scuffing and Osmo hardwax oil application.',
+          toolsOrMethods: ['Household steam iron', '320-grit abrasive pad', 'Hardwax oil', 'Lint-free lint cloth'],
+        },
+        reuse: {
+          title: 'Acoustic Suspended Ceiling Baffle',
+          description: 'Suspend unserviceable curved seat shells upside down from wire grids to act as sound-diffusing architectural ceiling canopies.',
+          suitability: 'Curved geometry naturally breaks standing sound waves in open-plan workspaces.',
+        },
+        reimagine: {
+          title: 'Flat-Pack Tension Interlocking Stool',
+          description: 'Slice the bent plywood profile into sequential cross-sectional ribs laced with tensioned natural cord, eliminating all hardware fasteners.',
+          circularConcept: 'Mono-material composite reimagined into reversible dry-assembled joinery.',
+        },
+      },
+      designInsight: {
+        industrialDesignContext: 'Pioneered by Alvar Aalto and the Eameses, molded plywood allowed mid-century industrial designers to achieve organic anatomical forms without heavy carving or metal casting, transforming post-war manufacturing economics.',
+        verificationGuidance: 'Observe the edge grain: true plywood reveals distinct stratified alternating dark and light veneer layers. Tap test produces a resonant, organic wood thud rather than the hollow ping of molded plastics.',
+      },
+    },
+  },
+  {
+    id: 'anodized-aluminum',
+    name: 'Anodized Aluminum 6061-T6',
+    category: 'Metal / Non-Ferrous Light Alloy',
+    thumbnail: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="600" height="400" fill="%232D3436"/><rect x="40" y="40" width="520" height="320" fill="%233A4143" stroke="%234A5457" stroke-width="2"/><line x1="40" y1="120" x2="560" y2="120" stroke="%23222829" stroke-width="2"/><line x1="40" y1="200" x2="560" y2="200" stroke="%23222829" stroke-width="2"/><circle cx="100" cy="80" r="12" fill="%231E2324"/><circle cx="500" cy="80" r="12" fill="%231E2324"/><text x="60" y="330" font-family="monospace" font-size="14" fill="%23A0AAB0">6061-T6 MIL-A-8625 TYPE II ANODIZED</text></svg>`,
+    analysis: {
+      specimenId: 'MAT-2026-8802',
+      timestamp: '2026-10-22T10:20:00.000Z',
+      imageUrl: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="600" height="400" fill="%232D3436"/><rect x="40" y="40" width="520" height="320" fill="%233A4143" stroke="%234A5457" stroke-width="2"/><line x1="40" y1="120" x2="560" y2="120" stroke="%23222829" stroke-width="2"/><line x1="40" y1="200" x2="560" y2="200" stroke="%23222829" stroke-width="2"/><circle cx="100" cy="80" r="12" fill="%231E2324"/><circle cx="500" cy="80" r="12" fill="%231E2324"/><text x="60" y="330" font-family="monospace" font-size="14" fill="%23A0AAB0">SPECIMEN / MAT-2026-8802 · ANODIZED ALUMINUM 6061</text></svg>`,
+      identification: {
+        materialName: 'Extruded & CNC-Milled Aluminum 6061-T6 (Al-Mg-Si Alloy)',
+        secondaryMaterials: ['Electrochemical anodic oxide layer (~15 microns)', 'A2 stainless steel socket fasteners'],
+        classification: 'Metal / Structural Non-Ferrous Light Alloy',
+        confidence: 'HIGH',
+        visibleCharacteristics: 'Micro-bead blasted uniform matte texture, crisp chamfered edge transitions, absence of porosity, deep gunmetal gray anodize dye with metallic sheen.',
+      },
+      properties: {
+        durability: 'Extreme resistance to wear and atmospheric corrosion; surface hardness enhanced to 50–60 HRC equivalent on oxide layer.',
+        structuralBehavior: 'High tensile yield strength (~276 MPa) with low density (2.70 g/cm³); ideal stiffness-to-weight index.',
+        rigidityOrFlexibility: 'High structural rigidity with predictable elastic deformation under cyclic dynamic load.',
+        surfaceTextureAndFinish: 'Fine satin tactile feel, non-greasy, finger-print resistant bead-blasted surface.',
+        environmentalResistance: 'Superior resistance to moisture, salt spray, and extreme thermal cycling (-50°C to +150°C).',
+        manufacturingProcesses: ['Direct hot extrusion', '5-axis CNC high-speed machining', 'Glass bead blasting', 'Type II sulfuric anodizing'],
+        typicalApplications: ['Laptop and smartphone unibodies', 'Bicycle frames', 'Architectural glazing mullions', 'Aerospace brackets'],
+      },
+      sustainability: {
+        recyclability: '100% infinitely recyclable without material degradation. Secondary remelting uses only 5% of original bauxite smelting energy.',
+        reusability: 'Extremely high; structural modular profiles can be unbolted, re-cut, or tapped for new assemblies.',
+        repairability: 'Moderate; minor scratches can be blended with abrasive nylon pads, but deep gouges require re-machining or stripping and re-anodizing.',
+        longevity: '80–100+ years without mechanical failure under non-extreme fatigue.',
+        environmentalConcerns: 'Primary extraction of bauxite is energy-intensive and produces toxic red mud waste; strongly favor recycled post-consumer billet.',
+        endOfLifeAndSeparation: 'Easily separated using industrial eddy-current separators in municipal and scrap recovery facilities.',
+      },
+      redesign: {
+        repair: {
+          title: 'Oxide Touch-Up & Fastener Re-Torquing',
+          description: 'Clean minor edge abrasions with isopropyl alcohol and apply a chemical conversion coating (Alodine touch-up pen) to restore passivated protection.',
+          toolsOrMethods: ['Isopropyl alcohol 99%', 'Conversion coating pen', 'Calibrated hex torque driver'],
+        },
+        reuse: {
+          title: 'High-Efficiency Passive Heat Sink Plate',
+          description: 'Repurpose the flat aluminum plate as a thermal conduit for custom high-output LED desk luminaires or solid-state audio amplifiers.',
+          suitability: 'Thermal conductivity of ~167 W/m·K rapidly evacuates heat without cooling fans.',
+        },
+        reimagine: {
+          title: 'Interlocking Modular Bracket System',
+          description: 'Machine standardized dovetail slots along the extrusion perimeter to allow glueless, fastener-free reassembly into shelving or table frames.',
+          circularConcept: 'Mono-material mechanical joinery facilitating rapid disassembly and direct reuse.',
+        },
+      },
+      designInsight: {
+        industrialDesignContext: 'In industrial design, 6061-T6 represents the gold standard of precision machining. Its ability to hold tolerances of ±0.02mm while taking a lustrous anodic dye has defined modern consumer electronic aesthetics from Braun to Apple.',
+        verificationGuidance: 'Non-destructive test: Touch surface with palm—feels instantly cold due to high thermal conductivity. Tap with a coin produces a sharp, bright metallic ring. Holds zero magnetic pull against a magnet.',
+      },
+    },
+  },
+  {
+    id: 'hdpe-plastic',
+    name: 'Post-Consumer Recycled HDPE',
+    category: 'Thermoplastic Polymer (Code 02)',
+    thumbnail: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="600" height="400" fill="%2322302A"/><circle cx="150" cy="120" r="45" fill="%238FA892"/><circle cx="320" cy="180" r="70" fill="%23D4CEBE"/><circle cx="480" cy="140" r="50" fill="%235C6F61"/><circle cx="220" cy="280" r="60" fill="%23AABBAE"/><circle cx="420" cy="300" r="55" fill="%23E5E1D5"/><text x="40" y="370" font-family="monospace" font-size="14" fill="%23F5F3ED">RECYCLED HDPE 02 · MULTI-FLAKE COMPOSITE</text></svg>`,
+    analysis: {
+      specimenId: 'MAT-2026-8803',
+      timestamp: '2026-10-22T10:25:00.000Z',
+      imageUrl: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="600" height="400" fill="%2322302A"/><circle cx="150" cy="120" r="45" fill="%238FA892"/><circle cx="320" cy="180" r="70" fill="%23D4CEBE"/><circle cx="480" cy="140" r="50" fill="%235C6F61"/><circle cx="220" cy="280" r="60" fill="%23AABBAE"/><circle cx="420" cy="300" r="55" fill="%23E5E1D5"/><text x="40" y="370" font-family="monospace" font-size="14" fill="%23F5F3ED">SPECIMEN / MAT-2026-8803 · RECYCLED HDPE 02</text></svg>`,
+      identification: {
+        materialName: 'Post-Consumer High-Density Polyethylene (HDPE 02)',
+        secondaryMaterials: ['Suspended colorant pigment flakes', 'No added chemical adhesives or stabilizers'],
+        classification: 'Thermoplastic Polymer / Polyolefin',
+        confidence: 'HIGH',
+        visibleCharacteristics: 'Mottled multi-colored flake matrix with semi-crystalline waxy sheen, rounded compressive thermoforming contours, slight self-lubricating surface feel.',
+      },
+      properties: {
+        durability: 'Outstanding impact resistance; virtually unbreakable under blunt impact, zero moisture absorption, highly ductile.',
+        structuralBehavior: 'Viscoelastic behavior; susceptible to creep under continuous sustained high loads, but absorbs dynamic shock effortlessly.',
+        rigidityOrFlexibility: 'Semi-rigid; exhibits mild flex in thin cross-sections with resilient memory recovery.',
+        surfaceTextureAndFinish: 'Slightly waxy tactile surface with low coefficient of friction; naturally resistant to stains and adhesion.',
+        environmentalResistance: 'Impervious to water, acids, alkalis, and oils. Requires UV stabilizer additives if permanently exposed to harsh outdoor sunlight.',
+        manufacturingProcesses: ['Flake shredding & washing', 'Compression sheet molding', 'CNC routing', 'Rotomolding'],
+        typicalApplications: ['Outdoor urban furniture', 'Industrial cutting boards', 'Piping systems', 'Marine dock bumpers'],
+      },
+      sustainability: {
+        recyclability: 'Universally recyclable in curbside municipal programs (Resin Code 02). Can be remelted and remolded 8–10 times without severe degradation.',
+        reusability: 'High; panels can be sawed, drilled, planed, and re-screwed just like traditional timber.',
+        repairability: 'Excellent; gouges and cracks can be hot-air plastic welded using standard HDPE welding rods.',
+        longevity: '50–100+ years outdoors without rot, splinters, or corrosion.',
+        environmentalConcerns: 'Microplastic shedding if mechanically abraded; derived from petrochemicals, but post-consumer recycling diverts landfill waste.',
+        endOfLifeAndSeparation: 'Float-sink tanks easily isolate HDPE (density 0.95 g/cm³, floats in water) from denser plastics like PET and PVC.',
+      },
+      redesign: {
+        repair: {
+          title: 'Hot-Air Plastic Welding & Heat Planing',
+          description: 'Repair scratches or gouges using a heat gun with a reduction nozzle and an HDPE filler rod cut from a matching milk jug or bottle cap.',
+          toolsOrMethods: ['Heat gun (approx 260°C)', 'HDPE welding strip', 'Cabinet scraper'],
+        },
+        reuse: {
+          title: 'Exterior Planter Bed Cladding',
+          description: 'Cut modular panels to line raised garden planters; zero chemical leaching ensures soil safety while preventing rot.',
+          suitability: 'Unaffected by continuous contact with moist soil and root penetration.',
+        },
+        reimagine: {
+          title: 'Monolithic Thermoformed Lounge Seat',
+          description: 'Re-heat the flat sheet over a curved wooden buck to fold a single continuous monocoque chair with zero fasteners or adhesives.',
+          circularConcept: 'Pure mono-polymer construction ready for 100% closed-loop remelting at end of life.',
+        },
+      },
+      designInsight: {
+        industrialDesignContext: 'Contemporary circular design studios like Smile Plastics and Precious Plastic have transformed post-consumer HDPE from a hidden utilitarian plastic into an expressive architectural material celebrated for its terrazzo-like aesthetic.',
+        verificationGuidance: 'Water float test: small sliver placed in tap water floats (density < 1.0 g/cm³). Surface has a distinct paraffin/waxy hand-feel that cannot be glued with standard adhesives.',
+      },
+    },
+  },
+  {
+    id: 'terrazzo-composite',
+    name: 'Terrazzo Cementitious Composite',
+    category: 'Mineral / Engineered Aggregated Stone',
+    thumbnail: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="600" height="400" fill="%23E7E4DC"/><polygon points="80,60 120,40 110,90" fill="%232D3732"/><polygon points="200,140 260,110 240,180" fill="%23BA7A58"/><polygon points="350,60 410,80 390,130" fill="%2356675B"/><polygon points="460,220 520,200 490,270" fill="%232D3732"/><polygon points="120,250 170,220 150,300" fill="%23A89F91"/><polygon points="280,260 340,240 320,320" fill="%23BA7A58"/><text x="40" y="370" font-family="monospace" font-size="14" fill="%23222522">MINERAL COMPOSITE · MARBLE AGGREGATE IN WHITE CEMENT</text></svg>`,
+    analysis: {
+      specimenId: 'MAT-2026-8804',
+      timestamp: '2026-10-22T10:30:00.000Z',
+      imageUrl: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="600" height="400" fill="%23E7E4DC"/><polygon points="80,60 120,40 110,90" fill="%232D3732"/><polygon points="200,140 260,110 240,180" fill="%23BA7A58"/><polygon points="350,60 410,80 390,130" fill="%2356675B"/><polygon points="460,220 520,200 490,270" fill="%232D3732"/><polygon points="120,250 170,220 150,300" fill="%23A89F91"/><polygon points="280,260 340,240 320,320" fill="%23BA7A58"/><text x="40" y="370" font-family="monospace" font-size="14" fill="%23222522">SPECIMEN / MAT-2026-8804 · TERRAZZO COMPOSITE</text></svg>`,
+      identification: {
+        materialName: 'Venetian Cementitious Terrazzo Tile',
+        secondaryMaterials: ['Crushed Carrara marble aggregate (70%)', 'White Portland cement matrix (30%)', 'Penetrating siloxane sealer'],
+        classification: 'Ceramic & Mineral Composite / Cast Agglomerate',
+        confidence: 'HIGH',
+        visibleCharacteristics: 'Polished planar surface revealing angular cross-sections of white, beige, and serpentine green marble chips embedded in a fine cementitious matrix.',
+      },
+      properties: {
+        durability: 'Extreme compressive strength and high abrasion resistance; capable of withstanding heavy pedestrian foot traffic for centuries.',
+        structuralBehavior: 'Brittle fracture characteristics under tensile or bending stress; requires a rigid substrate or continuous backing support.',
+        rigidityOrFlexibility: 'Completely rigid with zero flexibility; thermal expansion coefficient matched to underlying concrete screeds.',
+        surfaceTextureAndFinish: 'Honed or polished smooth surface with cold stone tactile resonance; pores sealed with mineral penetrating sealer.',
+        environmentalResistance: 'Highly heat and fire resistant (Class A1 non-combustible); susceptible to etching by acidic liquids (lemon, vinegar) if unsealed.',
+        manufacturingProcesses: ['Aggregate batch mixing', 'Hydraulic press vibro-compaction', 'Curing in moisture chamber', 'Diamond wet grinding & polishing'],
+        typicalApplications: ['Palazzo and airport flooring', 'Kitchen countertops', 'Architectural vanity tops', 'Heavy plinths'],
+      },
+      sustainability: {
+        recyclability: 'Crushable into high-grade aggregate for new concrete or road ballast; non-toxic mineral composition.',
+        reusability: 'Tiles and slabs can be carefully reclaimed, re-cut with wet masonry saws, and reinstalled.',
+        repairability: 'Excellent; chips and cracks can be patched with color-matched cement grout or epoxy aggregate fill and re-polished flush.',
+        longevity: '100–300+ years (many Roman and Renaissance terrazzo floors remain in active service today).',
+        environmentalConcerns: 'Embodied carbon from Portland cement manufacturing; mitigated by utilizing quarry marble offcuts that would otherwise be discarded.',
+        endOfLifeAndSeparation: 'Heavy mechanical weight requires motorized transport, but inert mineral mass causes zero hazardous landfill contamination.',
+      },
+      redesign: {
+        repair: {
+          title: 'Color-Matched Grout Infill & Wet Polishing',
+          description: 'Fill corner spalls with white cement mixed with marble dust, allow 72-hour cure, then hone flush with 400 to 1200-grit diamond hand pads.',
+          toolsOrMethods: ['White cement + pigment', 'Diamond wet polishing pads', 'Neutral pH stone cleaner'],
+        },
+        reuse: {
+          title: 'Thermal Inertia Pizza Stone or Trivet',
+          description: 'Re-cut salvaged floor tiles into kitchen trivets or serving platters; retains heat or cold exceptionally well.',
+          suitability: 'Food-safe mineral composition once sealed with food-grade beeswax.',
+        },
+        reimagine: {
+          title: 'Modular Urban Seating Plinth',
+          description: 'Cast reclaimed broken slab fragments into sculptural street furniture blocks with raw exposed chisel-fracture edges.',
+          circularConcept: 'Elevates industrial construction demolition waste into distinctive civic public realm artifacts.',
+        },
+      },
+      designInsight: {
+        industrialDesignContext: 'Invented by 15th-century Venetian mosaic workers who pressed discarded marble fragments into goat-milk-bound clay, terrazzo is the original circular architecture material: turning industrial quarry waste into high-status luxury surfaces.',
+        verificationGuidance: 'Surface feels dense and stone-cold to palm contact. Inspection with a hand magnifier reveals individual crystalline cleavage planes inside the marble chips bound by fine cement binder.',
+      },
+    },
+  },
+];

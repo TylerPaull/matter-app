@@ -1,0 +1,6 @@
+{
+  "name": "MATTER — AI Material Intelligence",
+  "description": "Understand what things are made of. Multimodal AI material identification and circular design assistant.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
